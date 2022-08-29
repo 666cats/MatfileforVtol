@@ -1,0 +1,224 @@
+% Copyright (C) 2018, ETH Zurich, D-ITET, Kenneth Kuchera, Alexander Liniger
+% Licensed under the Apache License, Version 2.0 (the "License");
+% you may not use this file except in compliance with the License.
+% You may obtain a copy of the License at
+% 
+%     http://www.apache.org/licenses/LICENSE-2.0
+% 
+% Unless required by applicable law or agreed to in writing, software
+% distributed under the License is distributed on an "AS IS" BASIS,
+% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+% See the License for the specific language governing permissions and
+% limitations under the License.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function xp=SimTimeStep(x,u,Ts,ModelParams,GammaArray)
+%x state
+%u input
+%Ts sampling time
+x0=x;
+
+[~,inivt]=ode45(@(t,x)fx_bicycle(t,x,u,ModelParams,GammaArray),[0 Ts],x0);
+xp=inivt(end,:);
+return
+
+function xdot=fx_bicycle(t,x,u,ModelParams,GammaArray)
+
+mass=ModelParams.m; %总质量
+Sa=ModelParams.Sa; %主翼面积
+Sc=ModelParams.Sc; %鸭翼面积
+rho=ModelParams.rho; %空气密度
+ct_s=ModelParams.ct_s;
+% ct_t=ModelParams.ct_t; %电机推力系数
+g=ModelParams.g; %重力因子
+theta_a=ModelParams.theta_a; %主翼安装角
+theta_c=ModelParams.theta_c; %鸭翼安装角
+l1=ModelParams.lamda_1;
+l2=ModelParams.lamda_2;
+kmotor=ModelParams.kmotor;
+
+wing_cl0=ModelParams.wing_cl0;
+wing_cd0=ModelParams.wing_cd0;
+wing_clm=ModelParams.wing_clm;
+wing_cdm=ModelParams.wing_cdm;
+wing_a_clm=ModelParams.wing_aileron_clm;
+wing_a_cdm=ModelParams.wing_aileron_cdm;
+
+c_cl0=ModelParams.canard_cl0;
+c_cd0=ModelParams.canard_cd0;
+c_clm=ModelParams.canard_clm;
+c_cdm=ModelParams.canard_cdm;
+
+ga1=GammaArray.gamma1;
+ga2=GammaArray.gamma2;
+ga3=GammaArray.gamma3;
+ga4=GammaArray.gamma4;
+ga5=GammaArray.gamma5;
+ga6=GammaArray.gamma6;
+ga7=GammaArray.gamma7;
+ga8=GammaArray.gamma8;
+
+phi=x(ModelParams.stateindex_phi);
+theta=x(ModelParams.stateindex_theta);
+psi=x(ModelParams.stateindex_psi);
+v_x=x(ModelParams.stateindex_vx);
+v_y=x(ModelParams.stateindex_vy);
+v_z=x(ModelParams.stateindex_vz);
+o_x=x(ModelParams.stateindex_omega_x);
+o_y=x(ModelParams.stateindex_omega_y);
+o_z=x(ModelParams.stateindex_omega_z);
+mu=x(ModelParams.stateindex_mu);
+
+dal=u(ModelParams.inputindex_delta_aileron_l);
+dar=u(ModelParams.inputindex_delta_aileron_r);
+ml=u(ModelParams.inputindex_motor_l);
+mr=u(ModelParams.inputindex_motor_r);
+% mt=u(ModelParams.inputindex_motor_t);
+dc=u(ModelParams.inputindex_canard);
+vmu=u(ModelParams.inputindex_vmu);
+
+%左主翼面
+b2sx_l=ModelParams.b2sx_l;
+b2sy_l=ModelParams.b2sy_l;
+b2sz_l=ModelParams.b2sz_l;
+%右主翼面
+b2sx_r=ModelParams.b2sx_r;
+b2sy_r=ModelParams.b2sy_r;
+b2sz_r=ModelParams.b2sz_r;
+%鸭翼(假设鸭翼只参与俯仰)
+b2cx=ModelParams.b2cx;
+b2cy=ModelParams.b2cy;
+b2cz=ModelParams.b2cz;
+
+%左悬停电机
+b2px_l=ModelParams.b2px_l;
+b2py_l=ModelParams.b2py_l;
+b2pz_l=ModelParams.b2pz_l;
+%右悬停电机
+b2px_r=ModelParams.b2px_r;
+b2py_r=ModelParams.b2py_r;
+b2pz_r=ModelParams.b2pz_r;
+% %推力电机
+% b2px_t=ModelParams.b2px_t;
+% b2py_t=ModelParams.b2py_t;
+% b2pz_t=ModelParams.b2pz_t;
+
+
+o=[phi;theta;psi];
+v=[v_x;v_y;v_z];
+omega=[o_x;o_y;o_z];
+
+vi=sqrt(v_x*v_x+v_y*v_y+v_z*v_z);%air velocity without motor
+vml=kmotor*ml;
+vmr=kmotor*mr;
+va_l=sqrt((l1*v_x+l2*vml)*(l1*v_x+l2*vml)+v_y*v_y+v_z*v_z);
+va_r=sqrt((l1*v_x+l2*vmr)*(l1*v_x+l2*vmr)+v_y*v_y+v_z*v_z);
+b2s_l=[b2sx_l;b2sy_l;b2sz_l];
+b2s_r=[b2sx_r;b2sy_r;b2sz_r];
+b2c=[b2cx;b2cy;b2cz];
+b2p_l=[b2px_l;b2py_l;b2pz_l];
+b2p_r=[b2px_r;b2py_r;b2pz_r];
+% b2p_t=[b2px_t;b2py_t;b2pz_t];
+
+
+Rb2s=zeros(3,3); % the rotation matrix of body 2 surface(main Rb2cwing)
+Rb2s(1,1)=cos(theta_a);
+Rb2s(1,3)=-sin(theta_a);
+Rb2s(2,2)=1;
+Rb2s(3,1)=sin(theta_a);
+Rb2s(3,3)=cos(theta_a);
+
+ac=theta_c+dc;
+Rb2c=zeros(3,3); %the rotation matrix of body 2 canard
+Rb2c(1,1)=cos(ac);
+Rb2c(1,3)=-sin(ac);
+Rb2c(2,2)=1;
+Rb2c(3,1)=sin(ac);
+Rb2s(3,3)=cos(ac);
+
+vc=Rb2c*v;
+aoa_c=atan(vc(3)/vc(1));% angle of attack(canard)
+vsi=Rb2s*v;
+aoa_s=atan(vsi(3)/vsi(1)); % angle of attack(main wing)
+aos=asin(v_y/vi); %angle of sideslip
+
+% the rotation matrix of wind_frame 2 body_frame
+Rw2b=[cos(aos)*cos(aoa_s) -sin(aos)*cos(aoa_s) -sin(aoa_s);
+    sin(aos) cos(aos) 0;
+    cos(aos)*sin(aoa_s) -sin(aos)*sin(aoa_s) cos(aoa_s)];
+
+cls_l=wing_cl0+wing_clm*aoa_s+wing_a_clm*dal;
+cls_r=wing_cl0+wing_clm*aoa_s+wing_a_clm*dar;
+cds_l=wing_cd0+wing_cdm*abs(aoa_s)+wing_a_cdm*abs(dal);
+cds_r=wing_cd0+wing_cdm*abs(aoa_s)+wing_a_cdm*abs(dar);
+clc=c_cl0+c_clm*aoa_c;
+cdc=c_cd0+c_cdm*abs(aoa_c);
+
+%% The Force Part
+
+% the force of main wing
+fs_l=[-(1/2)*rho*Sa*va_l*va_l*cds_l;
+    0;
+    -(1/2)*rho*Sa*va_l*va_l*cls_l];
+fs_r=[-(1/2)*rho*Sa*va_r*va_r*cds_r;
+    0;
+    -(1/2)*rho*Sa*va_r*va_r*cls_r];
+fsb_l=Rw2b*fs_l;
+fsb_r=Rw2b*fs_r;
+fsb=fsb_l+fsb_r;
+
+% the force of canard
+fc=[-(1/2)*rho*Sc*vi*vi*cdc;
+    0;
+    -(1/2)*rho*Sc*vi*vi*clc];
+fcb=Rw2b*fc;
+
+%the force of gravity
+fgb=[-mass*g*sin(theta);
+    mass*g*cos(theta)*sin(phi);
+    mass*g*cos(theta)*cos(phi)];
+
+% the force of motor
+fpb_l=ct_s*[vml*vml-vi*vi;0;0];
+fpb_r=ct_s*[vmr*vmr-vi*vi;0;0];
+fpb=fpb_l+fpb_r;
+% fpb_t=ct_t*[vmt*vmt-vi*vi;0;0];
+% fpb=fpb_l+fpb_r+fpb_t;
+
+fxb=fsb(1)+fcb(1)+fpb(1)+fgb(1);
+fyb=fsb(2)+fcb(2)+fpb(2)+fgb(2);
+fzb=fsb(3)+fcb(3)+fpb(3)+fgb(3);
+%% The Moment Part
+
+ms_l=cross(b2s_l,fsb_l);
+ms_r=cross(b2s_r,fsb_r);
+mc=cross(b2c,fcb);
+mp_l=cross(b2p_l,fpb_l);
+mp_r=cross(b2p_r,fpb_r);
+% mp_t=cross(b2p_t,fpb_t);
+
+
+% mtotal=ms_l+ms_r+mc+mp_l+mp_r+mp_t;
+mtotal=ms_l+ms_r+mc+mp_l+mp_r;
+l=mtotal(1);
+m=mtotal(2);
+n=mtotal(3);
+
+%% formula of model
+xdot=[cos(theta)*cos(psi)*v_x+(sin(phi)*sin(theta)*cos(psi)-cos(phi)*sin(psi))*v_y+(cos(phi)*sin(theta)*cos(psi)+sin(phi)*sin(psi))*v_z;
+    cos(theta)*sin(psi)*v_x+(sin(phi)*sin(theta)*sin(psi)+cos(phi)*cos(psi))*v_y+(cos(phi)*sin(theta)*sin(psi)-sin(phi)*cos(psi))*v_z;
+    -sin(theta)*v_x+sin(phi)*cos(theta)*v_y+cos(phi)*cos(theta)*v_z;
+    o_x+sin(phi)*tan(theta)*o_y+cos(phi)*tan(theta)*o_z;
+    cos(phi)*o_y-sin(phi)*o_z;
+    sin(phi)*sec(theta)*o_y+cos(phi)*sec(theta)*o_z;
+    o_z*v_y-o_y*v_z+fxb/mass;
+    o_x*v_z-o_z*v_x+fyb/mass;
+    o_y*v_x-o_x*v_y+fzb/mass;
+    ga1*o_x*o_y-ga2*o_y*o_z+ga3*l+ga4*n;
+    ga5*o_x*o_z-ga6*(o_x*o_x-o_z*o_z)+m/ModelParams.Jyy;
+    ga7*o_x*o_y-ga1*o_y*o_z+ga4*l+ga8*n;
+    u(6)];
+
+    
+return
