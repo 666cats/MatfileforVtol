@@ -42,31 +42,32 @@ ModelParams.ct_s=0.002; %悬停电机推力系数
 ModelParams.g=9.81; %重力因子
 ModelParams.theta_a=0; %主翼安装角
 ModelParams.theta_c=0.0698; %副翼安装角
+% ModelParams.theta_c=-0.2; %副翼安装角
 ModelParams.lamda_1=0.67;%等效空速因子vx
 ModelParams.lamda_2=0.33; %等效空速因子vm
 ModelParams.kmotor=0.03;%后洗速度和PWM的线性因子
 
 %% 离气动面和电机的距离
 %左主翼面
-ModelParams.b2sx_l=-0.3;
-ModelParams.b2sy_l=-0.135;
+ModelParams.b2sx_l=-0.135;
+ModelParams.b2sy_l=-0.3;
 ModelParams.b2sz_l=0;
 %右主翼面
-ModelParams.b2sx_r=0.3;
-ModelParams.b2sy_r=0.135;
+ModelParams.b2sx_r=-0.135;
+ModelParams.b2sy_r=0.3;
 ModelParams.b2sz_r=0;
 %鸭翼(假设鸭翼只参与俯仰)
-ModelParams.b2cx=0;
-ModelParams.b2cy=0.1858;
+ModelParams.b2cx=0.1858;
+ModelParams.b2cy=0;
 ModelParams.b2cz=-0.05;
 
 %左悬停电机
-ModelParams.b2px_l=-0.3;
-ModelParams.b2py_l=-0.085;
+ModelParams.b2px_l=-0.085;
+ModelParams.b2py_l=-0.3;
 ModelParams.b2pz_l=0;
 %右悬停电机
-ModelParams.b2px_r=0.3;
-ModelParams.b2py_r=0.085;
+ModelParams.b2px_r=-0.085;
+ModelParams.b2py_r=0.3;
 ModelParams.b2pz_r=0;
 %推力电机
 % ModelParams.b2px_t=0;

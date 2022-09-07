@@ -34,9 +34,9 @@ Ts = MPC_vars.Ts;
 % use normal ORCA Track
 load eight_path.mat
 track=20*eight_path';
-track(3,:)=track(3,:)*0.2;
+track(3,:)=track(3,:)*0.5;
 %% Simulation lenght and plotting
-simN = 100;
+simN = 300;
 %0=no plots, 1=plot predictions
 plotOn = 1;
 %0=real time iteration, 1=fixed number of QP iterations, 2=fixed number of damped QP iterations
@@ -80,7 +80,7 @@ x = repmat(x0,1,N+1); % all points identical to current measurment
 for i = 2:N+1
     theta_next = x(ModelParams.stateindex_mu,i-1)+Ts*vx0;
     phi_next = 0;
-    t_next=atan2(ppval(traj.dppz,theta_next),sqrt(ppval(traj.dppx,theta_next).^2+ppval(traj.dppy,theta_next).^2));
+    t_next=-atan2(ppval(traj.dppz,theta_next),sqrt(ppval(traj.dppx,theta_next).^2+ppval(traj.dppy,theta_next).^2));
     psi_next=atan2(ppval(traj.dppy,theta_next),ppval(traj.dppx,theta_next));
     % phi_next can jump by two pi, make sure there are no jumps in the
     % initial guess
@@ -161,8 +161,8 @@ for i = 1: simN
     %%%% simulate system %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    x0 = SimTimeStep(x(:,1),u(:,1),Ts,ModelParams,GammaArray)';
-%     x0=x(:,2);
+%     x0 = SimTimeStep(x(:,1),u(:,1),Ts,ModelParams,GammaArray)';
+    x0=x(:,2);
     x0 = unWrapX0(x0);
     [ theta, last_closestIdx] = findTheta(x0,track,traj.ppx.breaks,trackWidth,last_closestIdx);
     x0(ModelParams.stateindex_mu) = theta;

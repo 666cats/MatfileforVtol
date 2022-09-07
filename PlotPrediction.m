@@ -21,6 +21,8 @@ function [  ] = PlotPrediction( x,track,traj,ModelParams )
     figure(1);
     plot3(track(1,:),track(2,:),track(3,:));
     hold on
+    set(gca,'Ydir','reverse');
+    set(gca,'Zdir','reverse');
     plot3(ppval(traj.ppx,mod(x(13,:),tl)),ppval(traj.ppy,mod(x(13,:),tl)),ppval(traj.ppz,mod(x(13,:),tl)),':k')
     plot3(x(1,:),x(2,:),x(3,:),'-g')
     vtolbox(x(:,1),ModelParams.W/2,ModelParams.L/2,ModelParams.H/2)
