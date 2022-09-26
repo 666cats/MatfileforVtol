@@ -110,10 +110,12 @@ v=[v_x;v_y;v_z];
 omega=[o_x;o_y;o_z];
 
 vi=sqrt(v_x*v_x+v_y*v_y+v_z*v_z);%air velocity without motor
-vml=kmotor*ml;
-vmr=kmotor*mr;
-va_l=sqrt((l1*v_x+l2*vml)*(l1*v_x+l2*vml)+v_y*v_y+v_z*v_z);
-va_r=sqrt((l1*v_x+l2*vmr)*(l1*v_x+l2*vmr)+v_y*v_y+v_z*v_z);
+% vml=kmotor*ml;
+% vmr=kmotor*mr;
+% va_l=sqrt((l1*v_x+l2*vml)*(l1*v_x+l2*vml)+v_y*v_y+v_z*v_z);
+% va_r=sqrt((l1*v_x+l2*vmr)*(l1*v_x+l2*vmr)+v_y*v_y+v_z*v_z);
+va_l=sqrt(v_x*v_x+v_y*v_y+v_z*v_z);
+va_r=sqrt(v_x*v_x+v_y*v_y+v_z*v_z);
 b2s_l=[b2sx_l;b2sy_l;b2sz_l];
 b2s_r=[b2sx_r;b2sy_r;b2sz_r];
 b2c=[b2cx;b2cy;b2cz];
@@ -180,8 +182,10 @@ fgb=[-mass*g*sin(theta);
     mass*g*cos(theta)*cos(phi)];
 
 % the force of motor
-fpb_l=ct_s*[vml*vml-vi*vi;0;0];
-fpb_r=ct_s*[vmr*vmr-vi*vi;0;0];
+% fpb_l=ct_s*[vml*vml-vi*vi;0;0];
+% fpb_r=ct_s*[vmr*vmr-vi*vi;0;0];
+fpb_l=[ml;0;0];
+fpb_r=[mr;0;0];
 fpb=fpb_l+fpb_r;
 % fpb_t=ct_t*[vmt*vmt-vi*vi;0;0];
 % fpb=fpb_l+fpb_r+fpb_t;

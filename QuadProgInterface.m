@@ -88,7 +88,8 @@ tic
 %         disp('zd');
 %     end
 % end
-
+% options = optimoptions('linprog','Algorithm','dual-simplex');
+% x = linprog(f,A,b,Aeq,beq,LB,UB,options)
 [z,~,exitflag] = quadprog(H,f,A,b,Aeq,beq,LB,UB,[],options);
 QPtime = toc;
 

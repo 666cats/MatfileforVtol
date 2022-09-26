@@ -53,8 +53,8 @@ function MPC_vars = getMPC_vars()
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % bounds for non-nomalized state-inputs
-    MPC_vars.bounds = [-1e3,-1e3,-1e3,-4,-4,-4,5,-2,-5,-1,-1,-1,0,       -1,-1,-1, 20,20, 0,  -0.1,-0.1,-0.1,-10,-10,-10;
-                       1e3, 1e3, 1e3, 4, 4, 4, 15, 2, 5,  1, 1, 1,1e3,    1, 1, 1,950,950,20,   0.1, 0.1, 0.1,10,10,10;]'; 
+    MPC_vars.bounds = [-1e3,-1e3,-1e3,-4,-4,-4,5,-2,-5,-1,-1,-1,0,       -3,-3,-3, 0,0, -0.1,  -1,-1,-1,-1,-1,0;
+                                1e3, 1e3, 1e3, 4, 4, 4, 15, 2, 5,  1, 1, 1,1e3,         3, 3, 3,20,20,20,       1, 1, 1,1,1,10;]'; 
     % bounds for nomalized state-inputs (bounds can be changed by changing
     % % normalization)
 %     MPC_vars.bounds = [-1e4,-1e4,-3, 0.25,-3,-1,   0,    -1,-1, 0  ,  -0.25 ,-0.1,-10;
@@ -68,13 +68,13 @@ function MPC_vars = getMPC_vars()
     MPC_vars.qL= 1000; % lag cost
     MPC_vars.qVtheta= 0.5; % theta maximization cost
 
-    MPC_vars.rda_l=1e-4;
-    MPC_vars.rda_r=1e-4;
-    MPC_vars.rda_c=1e-4;
-    MPC_vars.rm_l=1e-4;
-    MPC_vars.rm_r=1e-4;
-    MPC_vars.rm_t=1e-4;
-    MPC_vars.rVtheta=1e-6;
+    MPC_vars.rda_l=1e-2;
+    MPC_vars.rda_r=1e-2;
+    MPC_vars.rda_c=1e-2;
+    MPC_vars.rm_l=1e-2;
+    MPC_vars.rm_r=1e-2;
+    MPC_vars.rm_t=1e-2;
+    MPC_vars.rVtheta=1e-4;
 
     MPC_vars.rdda_l=0.1;
     MPC_vars.rdda_r=0.1;

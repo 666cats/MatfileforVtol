@@ -88,10 +88,12 @@ v=[v_x;v_y;v_z];
 omega=[o_x;o_y;o_z];
 
 vi=sqrt(v_x*v_x+v_y*v_y+v_z*v_z);%air velocity without motor
-vml=kmotor*ml;
-vmr=kmotor*mr;
-va_l=sqrt((l1*v_x+l2*vml)*(l1*v_x+l2*vml)+v_y*v_y+v_z*v_z);
-va_r=sqrt((l1*v_x+l2*vmr)*(l1*v_x+l2*vmr)+v_y*v_y+v_z*v_z);
+% vml=kmotor*ml;
+% vmr=kmotor*mr;
+% va_l=sqrt((l1*v_x+l2*vml)*(l1*v_x+l2*vml)+v_y*v_y+v_z*v_z);
+% va_r=sqrt((l1*v_x+l2*vmr)*(l1*v_x+l2*vmr)+v_y*v_y+v_z*v_z);
+va_l=sqrt(v_x*v_x+v_y*v_y+v_z*v_z);
+va_r=sqrt(v_x*v_x+v_y*v_y+v_z*v_z);
 b2s_l=[b2sx_l;b2sy_l;b2sz_l];
 b2s_r=[b2sx_r;b2sy_r;b2sz_r];
 b2c=[b2cx;b2cy;b2cz];
@@ -158,8 +160,10 @@ fgb=[-mass*g*sin(theta);
     mass*g*cos(theta)*cos(phi)];
 
 % the force of motor
-fpb_l=ct_s*[vml*vml-vi*vi;0;0];
-fpb_r=ct_s*[vmr*vmr-vi*vi;0;0];
+% fpb_l=ct_s*[vml*vml-vi*vi;0;0];
+% fpb_r=ct_s*[vmr*vmr-vi*vi;0;0];
+fpb_l=[ml;0;0];
+fpb_r=[mr;0;0];
 % fpb_t=ct_t*[vmt*vmt-vi*vi;0;0];
 % fpb=fpb_l+fpb_r+fpb_t;
 fpb=fpb_l+fpb_r;
@@ -280,10 +284,12 @@ dadvy=0;
 dadvz=v_x/(v_x*v_x+v_z*v_z);
 
 
-dvaldvx=l1*(v_x*l1+l2*vml)/va_l;
+% dvaldvx=l1*(v_x*l1+l2*vml)/va_l;
+dvaldvx=v_x/va_l;
 dvaldvy=v_y/va_l;
 dvaldvz=v_z/va_l;
-dvardvx=l1*(v_x*l1+l2*vmr)/va_r;
+% dvardvx=l1*(v_x*l1+l2*vmr)/va_r;
+dvardvx=v_x/va_r;
 dvardvy=v_y/va_r;
 dvardvz=v_z/va_r;
 
@@ -398,15 +404,25 @@ dfcbzddc=cos_beta*(dsinacddc*fc(1)+dfcxddc*sin_alpha_c)+(dfczddc*cos_alpha_c+fc(
 
 %----The motor force part----%
 
-dpbdvx_l=-2*ct_s*v_x;
-dpbdvy_l=-2*ct_s*v_y;
-dpbdvz_l=-2*ct_s*v_z;
-dpbddml=2*ct_s*kmotor*kmotor*ml;
+% dpbdvx_l=-2*ct_s*v_x;
+% dpbdvy_l=-2*ct_s*v_y;
+% dpbdvz_l=-2*ct_s*v_z;
+% dpbddml=2*ct_s*kmotor*kmotor*ml;
+% 
+% dpbdvx_r=-2*ct_s*v_x;
+% dpbdvy_r=-2*ct_s*v_y;
+% dpbdvz_r=-2*ct_s*v_z;
+% dpbddmr=2*ct_s*kmotor*kmotor*mr;
 
-dpbdvx_r=-2*ct_s*v_x;
-dpbdvy_r=-2*ct_s*v_y;
-dpbdvz_r=-2*ct_s*v_z;
-dpbddmr=2*ct_s*kmotor*kmotor*mr;
+dpbdvx_l=0;
+dpbdvy_l=0;
+dpbdvz_l=0;
+dpbddml=1;
+
+dpbdvx_r=0;
+dpbdvy_r=0;
+dpbdvz_r=0;
+dpbddmr=1;
 
 % dpbdvx_t=-2*ct_t*vx;
 % dpbdvy_t=-2*ct_t*vy;
@@ -687,7 +703,7 @@ Bc_aug=[Bc gc];
 
 
 
-tmp = expm([Ac Bc_aug; zeros(su+1,sx+su+1)]*Ts);
+% tmp = expm([Ac Bc_aug; zeros(su+1,sx+su+1)]*Ts);
 
 
 tmp = expm([Ac Bc_aug; zeros(su+1,sx+su+1)]*Ts);

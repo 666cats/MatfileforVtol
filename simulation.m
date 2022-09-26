@@ -40,7 +40,7 @@ simN = 300;
 %0=no plots, 1=plot predictions
 plotOn = 1;
 %0=real time iteration, 1=fixed number of QP iterations, 2=fixed number of damped QP iterations
-QP_iter = 2;
+QP_iter = 0;
 % number of cars
 %% Fit spline to track
 % TODO spline function only works with regular spaced points.
@@ -136,12 +136,12 @@ for i = 1: simN
     [x,u] = augState(x,u,x0,MPC_vars,ModelParams,tl,GammaArray);
     %  formulate MPCC problem and solve it
     if QP_iter == 0
-        [x, u, b, exitflag,info] = optimizer_mpcc(TrackMPC,MPC_vars,ModelParams, n_cars, Y, x, u, x0, uprev,GammaArray);
+        [x, u, exitflag,info] = optimizer_mpcc(TrackMPC,MPC_vars,ModelParams, x, u, x0, uprev,GammaArray);
         qpTime_log(i) = info.QPtime;
     elseif QP_iter == 1
         % doing multiple "SQP" steps
         for k = 1:2
-            [x, u, b, exitflag,info] = optimizer_mpcc(TrackMPC,MPC_vars,ModelParams, n_cars, Y, x, u, x0, uprev,GammaArray);
+            [x, u, exitflag,info] = optimizer_mpcc(TrackMPC,MPC_vars,ModelParams, x, u, x0, uprev,GammaArray);
             qpTime_log(i) = qpTime_log(i) + info.QPtime;
         end
     elseif QP_iter == 2
