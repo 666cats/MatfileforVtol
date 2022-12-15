@@ -30,7 +30,7 @@ function [  ] = PlotPrediction( x,track,traj,ModelParams )
     hold off
 
 
-    pause(0.001)
+    pause(0.20)
 
 end
 

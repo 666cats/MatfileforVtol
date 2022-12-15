@@ -53,8 +53,8 @@ function MPC_vars = getMPC_vars()
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % bounds for non-nomalized state-inputs
-    MPC_vars.bounds = [-1e3,-1e3,-1e3,-4,-4,-4,5,-2,-5,-1,-1,-1,0,       -3,-3,-3, 0,0, -0.1,  -1,-1,-1,-1,-1,0;
-                                1e3, 1e3, 1e3, 4, 4, 4, 15, 2, 5,  1, 1, 1,1e3,         3, 3, 3,20,20,20,       1, 1, 1,1,1,10;]'; 
+    MPC_vars.bounds = [-1e3,-1e3,-1e3,-20,-20,-20,0,-2,-5,-1,-1,-1,0,       -3,-3,-3, 0,0, -0.1,  -1,-1,-1,-1,-1,0;
+                                1e3, 1e3, 1e3, 20, 20, 20, 15, 2, 7,  1, 1, 1,1e3,         3, 3, 3,20,20,20,       1, 1, 1,1,1,10;]'; 
     % bounds for nomalized state-inputs (bounds can be changed by changing
     % % normalization)
 %     MPC_vars.bounds = [-1e4,-1e4,-3, 0.25,-3,-1,   0,    -1,-1, 0  ,  -0.25 ,-0.1,-10;
@@ -63,8 +63,8 @@ function MPC_vars = getMPC_vars()
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Cost Parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    MPC_vars.qC = 0.1; % contouring cost
-    MPC_vars.qCNmult= 10000; % increase of terminal contouring cost
+    MPC_vars.qC = 1; % contouring cost
+    MPC_vars.qCNmult= 1000; % increase of terminal contouring cost
     MPC_vars.qL= 1000; % lag cost
     MPC_vars.qVtheta= 0.5; % theta maximization cost
 

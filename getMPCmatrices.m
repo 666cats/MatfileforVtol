@@ -142,13 +142,13 @@ function [deC_dtheta, deL_dtheta, deC_dx,deC_dy,deC_dz,deL_dx,deL_dy,deL_dz] = g
     temp1=1/(dx.^2+dy.^2+dz.^2);
     temp2=(dy*Dz-dz*Dy).^2+(dz*Dx-dx*Dz).^2+(dx*Dy-dy*Dx).^2;
 
-    dsqrttemp1_dtheta=sqrt(temp1).^3*(dx*ddx+dy*ddy+dz*ddz);
-    dtemp1_dtheta=temp1.^2*(dx*ddx+dy*ddy+dz*ddz);
+    dsqrttemp1_dtheta=-sqrt(temp1).^3*(dx*ddx+dy*ddy+dz*ddz);
+    dtemp1_dtheta=-temp1.^2*(dx*ddx+dy*ddy+dz*ddz);
     
     deL_dx=sqrt(temp1)*dx;
     deL_dy=sqrt(temp1)*dy;
     deL_dz=sqrt(temp1)*dz;
-    deL_dtheta=dsqrttemp1_dtheta*(dx*Dx+dy*Dy+dz*Dz)+temp1*(ddx*Dx+ddy*Dy+ddz*Dz-dx*dx-dy*dy-dz*dz);
+    deL_dtheta=dsqrttemp1_dtheta*(dx*Dx+dy*Dy+dz*Dz)+sqrt(temp1)*(ddx*Dx+ddy*Dy+ddz*Dz-dx*dx-dy*dy-dz*dz);
 
     deC_dx=2*temp1*(dy*dy*Dx+dz*dz*Dx-dx*dz*Dz-dx*dy*Dy);
     deC_dy=2*temp1*(dx*dx*Dy+dz*dz*Dy-dx*dy*Dx-dz*dy*Dz);
