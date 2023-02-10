@@ -35,7 +35,7 @@ function [xTemp,uTemp] = augState(x,u,x0,MPC_vars,ModelParams,tl,GammaArray,traj
     uTemp(:,j) = u(:,j);
     
     j = N+1;
-    xTemp(:,j) = SimTimeStep(x(:,N+1),u(:,N),Ts,ModelParams,GammaArray);
+    xTemp(:,j) =SimTimeStep(x(:,N+1),u(:,N),Ts,ModelParams,GammaArray);
     
 %     for k=1:13
 %         if xTemp(k,j)<MPC_vars.bounds(k,1)
@@ -45,7 +45,14 @@ function [xTemp,uTemp] = augState(x,u,x0,MPC_vars,ModelParams,tl,GammaArray,traj
 %         end
 %     end
     
-
+% MPC_vars = getMPC_vars();
+% ModelParams=getModelParams();
+% GammaArray=getGammaArray(ModelParams);
+% [A, B, g]=DiscretizedLinearizedModel(x(:,N+1),u(:,N),ModelParams,MPC_vars.Ts,GammaArray);
+% XNplus1=A*x(:,N+1)+B*u(:,N)+g;
+% XNplus1_ode=SimTimeStep(x(:,N+1),u(:,N),MPC_vars.Ts,ModelParams,GammaArray);
+% XNplus1-XNplus1_ode'
+% xTemp(:,j) =XNplus1;
 %     vx0=8;
 %     vy0=0;
 %     vz0=0;

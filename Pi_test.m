@@ -3,6 +3,12 @@ persistent state_prev;
 persistent I_term;
 global de_att
 
+theta=atan2(x(8)/x(7));
+cos_theta=cos(theta);
+sin_theta=sin(theta);
+Rw2v=[cos_theta,sin_theta,0;-sin_theta,cos_theta,0;0,0,1];
+Rw2b=[cos()]
+
 if isempty(state_prev)
     state_prev = [x(10:12);x(7)];
 end

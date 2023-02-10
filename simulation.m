@@ -34,7 +34,7 @@ Ts = MPC_vars.Ts;
 % use normal ORCA Track
 load eight_path.mat
 track=30*eight_path';
-track(3,:)=track(3,:)*0;
+track(3,:)=track(3,:)*0.2;
 %% Simulation lenght and plotting
 simN = 300;
 %0=no plots, 1=plot predictions
@@ -115,7 +115,7 @@ qpTime_log = zeros(1,simN);
 % inspiered by sequential quadratic programming (SQP)
 for i = 1:5
     % formulate MPCC problem and solve it
-    Iter_damping = 0.5; % 0 no damping
+    Iter_damping = 0.75; % 0 no damping
     [x_up, u_up, exitflag,info] = optimizer_mpcc(TrackMPC,MPC_vars,ModelParams, x, u, x0, uprev,GammaArray);
     x = Iter_damping*x + (1-Iter_damping)*x_up;
     u = Iter_damping*u + (1-Iter_damping)*u_up;
@@ -144,6 +144,8 @@ end
 %     pic_num = pic_num + 1;
 % end
 %% Simulation
+global pic_num
+pic_num=1;
 for i = 1: simN
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -187,7 +189,7 @@ for i = 1: simN
 %             x0(k)=0.95*MPC_vars.bounds(k,2);
 %         end
 %     end
-
+      
     x0=x(:,2);
     x0 = unWrapX0(x0);
     [ theta, last_closestIdx] = findTheta(x0,track,traj.ppx.breaks,trackWidth,last_closestIdx);
@@ -200,6 +202,15 @@ for i = 1: simN
 
     if plotOn == 1
         PlotPrediction(x,track,traj,ModelParams)
+        F=getframe(gcf);
+        I=frame2im(F);
+        [I,map]=rgb2ind(I,256);
+        if pic_num==1
+            imwrite(I,map,'test2.gif','gif','Loopcount',inf,'DelayTime',0.2);
+        else
+            imwrite(I,map,'test2.gif','gif','WriteMode','append','DelayTime',0.2);
+        end
+        pic_num = pic_num + 1;
     end
     
     % log predictions and time

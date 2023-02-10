@@ -90,7 +90,11 @@ tic
 % end
 % options = optimoptions('linprog','Algorithm','dual-simplex');
 % x = linprog(f,A,b,Aeq,beq,LB,UB,options)
-[z,~,exitflag] = quadprog(H,f,A,b,Aeq,beq,LB,UB,[],options);
+[z,fval,exitflag] = quadprog(H,f,A,b,Aeq,beq,LB,UB,[],options);
+% global temp_test
+% global temp1
+% temp_test=[temp_test;fval,z'*H*z,z'*f];
+% temp1 = [temp1,z.*f];
 QPtime = toc;
 
 X = zeros(nx,N+1);

@@ -22,7 +22,7 @@ function MPC_vars = getMPC_vars()
     % MPC settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % prediction horizon
-    MPC_vars.N = 50;
+    MPC_vars.N = 50;%50
     % sampling time
     MPC_vars.Ts = 0.05;
     % use bounds on all opt variables (TODO implement selective bounds)
@@ -53,8 +53,8 @@ function MPC_vars = getMPC_vars()
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % bounds for non-nomalized state-inputs
-    MPC_vars.bounds = [-1e3,-1e3,-1e3,-20,-20,-20,0,-2,-5,-1,-1,-1,0,       -3,-3,-3, 0,0, -0.1,  -1,-1,-1,-1,-1,0;
-                                1e3, 1e3, 1e3, 20, 20, 20, 15, 2, 7,  1, 1, 1,1e3,         3, 3, 3,20,20,20,       1, 1, 1,1,1,10;]'; 
+    MPC_vars.bounds = [-1e3,-1e3,-1e3,-20,-20,-20,0,-1,-3,-1,-1,-1,0,       -3,-3,-3, 0,0, -0.1,  -1,-1,-1,-1,-1,0;
+                                1e3, 1e3, 1e3, 20, 20, 20, 15, 1, 3,  1, 1, 1,1e3,         3, 3, 3,20,20,20,       1, 1, 1,1,1,10;]'; 
     % bounds for nomalized state-inputs (bounds can be changed by changing
     % % normalization)
 %     MPC_vars.bounds = [-1e4,-1e4,-3, 0.25,-3,-1,   0,    -1,-1, 0  ,  -0.25 ,-0.1,-10;
