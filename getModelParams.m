@@ -76,15 +76,18 @@ ModelParams.b2pz_r=0;
 
 %% 升力系数
 ModelParams.wing_cl0=0.8;
-ModelParams.wing_cd0=0.01;
-ModelParams.wing_clm=5.539;
+ModelParams.wing_cd0=0.01;%原始
+% ModelParams.wing_cd0=0.2;
+ModelParams.wing_clm=3.539;
 ModelParams.wing_cdm=0.1910;
-ModelParams.wing_aileron_clm=2.5;
+% ModelParams.wing_aileron_clm=2.5;
+ModelParams.wing_aileron_clm=0.85;
 ModelParams.wing_aileron_cdm=0.08;
 
 ModelParams.canard_cl0=0.8;
-ModelParams.canard_cd0=0.01;
-ModelParams.canard_clm=5.539;
+ModelParams.canard_cd0=0.01;%原始
+% ModelParams.canard_cd0=0.2;
+ModelParams.canard_clm=3.539;
 ModelParams.canard_cdm=0.1910;
 
 %% 转动惯量

@@ -32,11 +32,20 @@ N = MPC_vars.N;
 Ts = MPC_vars.Ts;
 %% import an plot track
 % use normal ORCA Track
+% load line_path.mat
+% track=15*line_path';
+% track(3,:)=track(3,:)*1;
+
 load eight_path.mat
 track=20*eight_path';
-track(3,:)=track(3,:)*0.5;
+track(3,:)=track(3,:)*1;
+track(1,:)=track(1,:)*0;
+
+% load nihepath.mat
+% track=20*nihepath';
+% track(3,:)=track(3,:)*1;
 %% Simulation lenght and plotting
-simN = 300;
+simN = 600;
 %0=no plots, 1=plot predictions
 plotOn = 1;
 %0=real time iteration, 1=fixed number of QP iterations, 2=fixed number of damped QP iterations
@@ -110,12 +119,14 @@ X_log = zeros(nx*(N+1),simN);
 U_log = zeros(nu*N,simN);
 B_log = zeros(nu*N,simN);
 qpTime_log = zeros(1,simN);
+X_his=[];
+U_his=[];
 %% initializtion
 % solve problem 5 times without applying input
 % inspiered by sequential quadratic programming (SQP)
 for i = 1:5
     % formulate MPCC problem and solve it
-    Iter_damping = 0.5; % 0 no damping
+    Iter_damping = 0.75; % 0 no damping
     [x_up, u_up, exitflag,info] = optimizer_mpcc(TrackMPC,MPC_vars,ModelParams, x, u, x0, uprev,GammaArray);
     x = Iter_damping*x + (1-Iter_damping)*x_up;
     u = Iter_damping*u + (1-Iter_damping)*u_up;
@@ -125,7 +136,27 @@ for i = 1:5
         PlotPrediction(x,track,traj,ModelParams)
     end
 end
+  
+
+% xnow=x(:,1);
+% pic_num=1;
+% for i=1:N
+% %     PlotPrediction(x(:,i),track,traj,ModelParams);
+%     xnow = SimTimeStep(xnow,u(:,i),Ts,ModelParams,GammaArray)';
+%     PlotPrediction(xnow,track,traj,ModelParams);
+%     F=getframe(gcf);
+%     I=frame2im(F);
+%     [I,map]=rgb2ind(I,256);
+%     if pic_num==1
+%         imwrite(I,map,'test2.gif','gif','Loopcount',inf,'DelayTime',0.2);
+%     else
+%         imwrite(I,map,'test2.gif','gif','WriteMode','append','DelayTime',0.2);
+%     end
+%     pic_num = pic_num + 1;
+% end
 %% Simulation
+global pic_num
+pic_num=1;
 for i = 1: simN
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -133,15 +164,15 @@ for i = 1: simN
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     % augment state and inputs by shifting previus optimal solution
-    [x,u] = augState(x,u,x0,MPC_vars,ModelParams,tl,GammaArray);
+    [x,u] = augState(x,u,x0,MPC_vars,ModelParams,tl,GammaArray,traj);
     %  formulate MPCC problem and solve it
     if QP_iter == 0
-        [x, u, b, exitflag,info] = optimizer_mpcc(TrackMPC,MPC_vars,ModelParams, n_cars, Y, x, u, x0, uprev,GammaArray);
+        [x, u, exitflag,info] = optimizer_mpcc(TrackMPC,MPC_vars,ModelParams, x, u, x0, uprev,GammaArray);
         qpTime_log(i) = info.QPtime;
     elseif QP_iter == 1
         % doing multiple "SQP" steps
         for k = 1:2
-            [x, u, b, exitflag,info] = optimizer_mpcc(TrackMPC,MPC_vars,ModelParams, n_cars, Y, x, u, x0, uprev,GammaArray);
+            [x, u, exitflag,info] = optimizer_mpcc(TrackMPC,MPC_vars,ModelParams, x, u, x0, uprev,GammaArray);
             qpTime_log(i) = qpTime_log(i) + info.QPtime;
         end
     elseif QP_iter == 2
@@ -160,20 +191,40 @@ for i = 1: simN
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%% simulate system %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
 %     x0 = SimTimeStep(x(:,1),u(:,1),Ts,ModelParams,GammaArray)';
+
+%     for k=1:13
+%         if x0(k)<MPC_vars.bounds(k,1)
+%             x0(k)=0.95*MPC_vars.bounds(k,1);
+%         elseif x0(k)>MPC_vars.bounds(k,2)
+%             x0(k)=0.95*MPC_vars.bounds(k,2);
+%         end
+%     end
+      
     x0=x(:,2);
     x0 = unWrapX0(x0);
     [ theta, last_closestIdx] = findTheta(x0,track,traj.ppx.breaks,trackWidth,last_closestIdx);
     x0(ModelParams.stateindex_mu) = theta;
     uprev = u(:,1);
     
+    X_his=[X_his,x0];
+    U_his=[U_his,uprev];
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%% plotting and logging %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if plotOn == 1
         PlotPrediction(x,track,traj,ModelParams)
+        F=getframe(gcf);
+        I=frame2im(F);
+        [I,map]=rgb2ind(I,256);
+        if pic_num==1
+            imwrite(I,map,'test2.gif','gif','Loopcount',inf,'DelayTime',0.2);
+        else
+            imwrite(I,map,'test2.gif','gif','WriteMode','append','DelayTime',0.2);
+        end
+        pic_num = pic_num + 1;
     end
     
     % log predictions and time
@@ -185,7 +236,7 @@ for i = 1: simN
 end
 
 
-PlotLog( X_log,U_log,Y,track,track2,simN,Ts)
+% PlotLog( X_log,U_log,Y,track,track2,simN,Ts)
 
 %% Generating Stats
 a = 1;

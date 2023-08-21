@@ -95,7 +95,7 @@ function Qk = generateH(pathinfo,MPC_vars,ModelParams,Xk,i)
 
 
     % make Qtilde symetric (not symetric due to numerical issues)
-    Qtilde = 0.5 *(Qtilde+Qtilde');
+%     Qtilde = 0.5 *(Qtilde+Qtilde');
     % Qk = contouring-lag error and real-input cost
     Qk = 2*blkdiag(Qtilde,diag([MPC_vars.rda_l,MPC_vars.rda_r,MPC_vars.rda_c,MPC_vars.rm_l,MPC_vars.rm_r,MPC_vars.rVtheta]));
     % scale cost
@@ -142,13 +142,13 @@ function [deC_dtheta, deL_dtheta, deC_dx,deC_dy,deC_dz,deL_dx,deL_dy,deL_dz] = g
     temp1=1/(dx.^2+dy.^2+dz.^2);
     temp2=(dy*Dz-dz*Dy).^2+(dz*Dx-dx*Dz).^2+(dx*Dy-dy*Dx).^2;
 
-    dsqrttemp1_dtheta=sqrt(temp1).^3*(dx*ddx+dy*ddy+dz*ddz);
-    dtemp1_dtheta=temp1.^2*(dx*ddx+dy*ddy+dz*ddz);
+    dsqrttemp1_dtheta=-sqrt(temp1).^3*(dx*ddx+dy*ddy+dz*ddz);
+    dtemp1_dtheta=-temp1.^2*(dx*ddx+dy*ddy+dz*ddz);
     
     deL_dx=sqrt(temp1)*dx;
     deL_dy=sqrt(temp1)*dy;
     deL_dz=sqrt(temp1)*dz;
-    deL_dtheta=dsqrttemp1_dtheta*(dx*Dx+dy*Dy+dz*Dz)+temp1*(ddx*Dx+ddy*Dy+ddz*Dz-dx*dx-dy*dy-dz*dz);
+    deL_dtheta=dsqrttemp1_dtheta*(dx*Dx+dy*Dy+dz*Dz)+sqrt(temp1)*(ddx*Dx+ddy*Dy+ddz*Dz-dx*dx-dy*dy-dz*dz);
 
     deC_dx=2*temp1*(dy*dy*Dx+dz*dz*Dx-dx*dz*Dz-dx*dy*Dy);
     deC_dy=2*temp1*(dx*dx*Dy+dz*dz*Dy-dx*dy*Dx-dz*dy*Dz);
@@ -183,7 +183,8 @@ function f = generatef(pathinfo,MPC_vars,ModelParams,Xk,i)
         Q = diag([MPC_vars.qC, MPC_vars.qL]);
     end
   
-    fx=2*e'*Q*grad_e - 2*Xk'*grad_e'*Q*grad_e; 
+   fx=2*e'*Q*grad_e - 2*Xk'*grad_e'*Q*grad_e; 
+%     fx= - 2*Xk'*grad_e'*Q*grad_e; 
     fT = [fx, zeros(1,ModelParams.su-1), -MPC_vars.qVtheta];
     f=fT';
     
@@ -206,8 +207,8 @@ function [eC, eL] = getErrors(pathinfo, theta_virt,x_phys,y_phys,z_phys)
     temp1=1/sqrt(dx.^2+dy.^2+dz.^2);
     temp2=sqrt((dy*Dz-dz*Dy).^2+(dz*Dx-dx*Dz).^2+(dx*Dy-dy*Dx).^2);
     
-    eC=temp1*temp2;
-    eL=temp1.^2*(dx*Dx+dy*Dy+dz*Dz).^2;
+    eC=temp1.^2*temp2.^2;
+    eL=temp1*(dx*Dx+dy*Dy+dz*Dz);
 end
 
 % EQUALITY CONSTRAINTS

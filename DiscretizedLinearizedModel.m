@@ -88,10 +88,12 @@ v=[v_x;v_y;v_z];
 omega=[o_x;o_y;o_z];
 
 vi=sqrt(v_x*v_x+v_y*v_y+v_z*v_z);%air velocity without motor
-vml=kmotor*ml;
-vmr=kmotor*mr;
-va_l=sqrt((l1*v_x+l2*vml)*(l1*v_x+l2*vml)+v_y*v_y+v_z*v_z);
-va_r=sqrt((l1*v_x+l2*vmr)*(l1*v_x+l2*vmr)+v_y*v_y+v_z*v_z);
+% vml=kmotor*ml;
+% vmr=kmotor*mr;
+% va_l=sqrt((l1*v_x+l2*vml)*(l1*v_x+l2*vml)+v_y*v_y+v_z*v_z);
+% va_r=sqrt((l1*v_x+l2*vmr)*(l1*v_x+l2*vmr)+v_y*v_y+v_z*v_z);
+va_l=sqrt(v_x*v_x+v_y*v_y+v_z*v_z);
+va_r=sqrt(v_x*v_x+v_y*v_y+v_z*v_z);
 b2s_l=[b2sx_l;b2sy_l;b2sz_l];
 b2s_r=[b2sx_r;b2sy_r;b2sz_r];
 b2c=[b2cx;b2cy;b2cz];
@@ -113,7 +115,7 @@ Rb2c(1,1)=cos(ac);
 Rb2c(1,3)=-sin(ac);
 Rb2c(2,2)=1;
 Rb2c(3,1)=sin(ac);
-Rb2s(3,3)=cos(ac);
+Rb2c(3,3)=cos(ac);
 
 vc=Rb2c*v;
 aoa_c=atan(vc(3)/vc(1));% angle of attack(canard)
@@ -158,8 +160,10 @@ fgb=[-mass*g*sin(theta);
     mass*g*cos(theta)*cos(phi)];
 
 % the force of motor
-fpb_l=ct_s*[vml*vml-vi*vi;0;0];
-fpb_r=ct_s*[vmr*vmr-vi*vi;0;0];
+% fpb_l=ct_s*[vml*vml-vi*vi;0;0];
+% fpb_r=ct_s*[vmr*vmr-vi*vi;0;0];
+fpb_l=[ml;0;0];
+fpb_r=[mr;0;0];
 % fpb_t=ct_t*[vmt*vmt-vi*vi;0;0];
 % fpb=fpb_l+fpb_r+fpb_t;
 fpb=fpb_l+fpb_r;
@@ -205,15 +209,15 @@ dfm1_dvx=cos(theta)*cos(psi);
 dfm1_dvy=cos(psi)*sin(theta)*sin(phi)-cos(phi)*sin(psi);
 dfm1_dvz=cos(phi)*cos(psi)*sin(theta)+sin(phi)*sin(psi);
 
-dfm2_dphi=v_y*cos(phi)*sin(theta)*sin(psi)-sin(phi)*((v_y-v_z)*cos(psi)+v_z*sin(theta)*sin(psi));
+dfm2_dphi=-v_z*cos(phi)*cos(psi)+v_y*cos(phi)*sin(theta)*sin(psi)-sin(phi)*(v_y*cos(psi)+v_z*sin(theta)*sin(psi));
 dfm2_dtheta=v_z*cos(theta)*cos(phi)*sin(psi)+(-v_x*sin(theta)+v_y*cos(theta)*sin(phi))*sin(psi);
-dfm2_dpsi=cos(psi)*(v_x*cos(theta)+v_y*sin(theta)*sin(phi))+cos(phi)*(v_z*cos(psi)*sin(theta)-(v_y-v_z)*sin(psi));
+dfm2_dpsi=cos(psi)*(v_x*cos(theta)+v_y*sin(theta)*sin(phi))+v_z*sin(phi)*sin(psi)+cos(phi)*(v_z*cos(psi)*sin(theta)-v_y*sin(psi));
 dfm2_dvx=cos(theta)*sin(psi);
 dfm2_dvy=cos(phi)*cos(psi)+sin(theta)*sin(phi)*sin(psi);
-dfm2_dvz=cos(phi)*(-cos(psi)+sin(theta)*sin(psi));
+dfm2_dvz=-cos(psi)*sin(phi)+cos(phi)*sin(theta)*sin(psi);
 
-dfm3_dphi=-v_z*cos(theta)*sin(phi);
-dfm3_dtheta=-v_x*cos(theta)+v_y*cos(theta)*cos(theta)-sin(theta)*(v_z*cos(phi)+v_y*sin(theta));
+dfm3_dphi=cos(theta)*(v_y*cos(phi)-v_z*sin(phi));
+dfm3_dtheta=-v_x*cos(theta)-sin(theta)*(v_z*cos(phi)+v_y*sin(theta));
 dfm3_dpsi=0;
 dfm3_dvx=-sin(theta);
 dfm3_dvy=cos(theta)*sin(theta);
@@ -259,7 +263,7 @@ sin_beta=v_y/vi;
 sin_alpha=temp1*cos_alpha;
 
 dcosbdvx=(v_x*v_y*v_y)/(sqrt((v_x^2+v_z^2)/vi^2)*vi^4);
-dcosbdvy=-v_y*(sqrt((v_x^2+v_z^2)/vi^2))^(3/2)/(v_x^2+v_z^2);
+dcosbdvy=-v_y*((v_x^2+v_z^2)/vi^2)^(3/2)/(v_x^2+v_z^2);
 dcosbdvz=v_z*v_y*v_y/(sqrt((v_x^2+v_z^2)/vi^2)*vi^4);
 
 temp2=(v_x*v_x+v_z*v_z)/(v_x*cos(theta_a)-v_z*sin(theta_a))^2;
@@ -267,9 +271,9 @@ dcosadvx=-v_z*(v_z*cos(theta_a)+v_x*sin(theta_a))/(v_x*v_x+v_z*v_z)/(-v_x*cos(th
 dcosadvy=0;
 dcosadvz=-v_x*(v_z*cos(theta_a)+v_x*sin(theta_a))/(v_x*cos(theta_a)-v_z*sin(theta_a))^3/temp2^(3/2);
 
-dsinbdvx=v_x*v_y/vi^(3/2);
+dsinbdvx=-v_x*v_y/vi^(3/2);
 dsinbdvy=(v_x*v_x+v_z*v_z)/vi^(3/2);
-dsinbdvz=v_y*v_z/vi^(3/2);
+dsinbdvz=-v_y*v_z/vi^(3/2);
 
 dsinadvx=-v_z/(v_x*v_x+v_z*v_z)/temp2^(1/2);
 dsinadvy=0;
@@ -280,24 +284,26 @@ dadvy=0;
 dadvz=v_x/(v_x*v_x+v_z*v_z);
 
 
-dvaldvx=l1*(v_x*l1+l2*vml)/va_l;
+% dvaldvx=l1*(v_x*l1+l2*vml)/va_l;
+dvaldvx=v_x/va_l;
 dvaldvy=v_y/va_l;
 dvaldvz=v_z/va_l;
-dvardvx=l1*(v_x*l1+l2*vmr)/va_r;
+% dvardvx=l1*(v_x*l1+l2*vmr)/va_r;
+dvardvx=v_x/va_r;
 dvardvy=v_y/va_r;
 dvardvz=v_z/va_r;
 
 dfsixdvx_l=-(rho*Sa*va_l*cds_l*dvaldvx+0.5*va_l*va_l*rho*Sa*wing_cdm*dadvx);
-dfsixdvz_l=-(rho*Sa*va_l*cds_l*dvaldvz+0.5*va_l*va_l*rho*Sa*wing_cdm*dadvy);
-dfsixdvy_l=-(rho*Sa*va_l*cds_l*dvaldvy+0.5*va_l*va_l*rho*Sa*wing_cdm*dadvz);
+dfsixdvy_l=-(rho*Sa*va_l*cds_l*dvaldvy+0.5*va_l*va_l*rho*Sa*wing_cdm*dadvy);
+dfsixdvz_l=-(rho*Sa*va_l*cds_l*dvaldvz+0.5*va_l*va_l*rho*Sa*wing_cdm*dadvz);
 
 dfsizdvx_l=-(rho*Sa*va_l*cls_l*dvaldvx+0.5*va_l*va_l*rho*Sa*wing_clm*dadvx);
 dfsizdvy_l=-(rho*Sa*va_l*cls_l*dvaldvy+0.5*va_l*va_l*rho*Sa*wing_clm*dadvy);
 dfsizdvz_l=-(rho*Sa*va_l*cls_l*dvaldvz+0.5*va_l*va_l*rho*Sa*wing_clm*dadvz);
 
 dfsixdvx_r=-(rho*Sa*va_r*cds_r*dvardvx+0.5*va_r*va_r*rho*Sa*wing_cdm*dadvx);
-dfsixdvz_r=-(rho*Sa*va_r*cds_r*dvardvy+0.5*va_r*va_r*rho*Sa*wing_cdm*dadvy);
-dfsixdvy_r=-(rho*Sa*va_r*cds_r*dvardvz+0.5*va_r*va_r*rho*Sa*wing_cdm*dadvz);
+dfsixdvy_r=-(rho*Sa*va_r*cds_r*dvardvy+0.5*va_r*va_r*rho*Sa*wing_cdm*dadvy);
+dfsixdvz_r=-(rho*Sa*va_r*cds_r*dvardvz+0.5*va_r*va_r*rho*Sa*wing_cdm*dadvz);
 
 dfsizdvx_r=-(rho*Sa*va_r*cls_r*dvardvx+0.5*va_r*va_r*rho*Sa*wing_clm*dadvx);
 dfsizdvy_r=-(rho*Sa*va_r*cls_r*dvardvy+0.5*va_r*va_r*rho*Sa*wing_clm*dadvy);
@@ -335,11 +341,11 @@ dfsizdda_r=-0.5*wing_a_clm*rho*Sa*va_r*va_r;
 
 dfsibxdda_l=cos_beta*cos_alpha*dfsixdda_l-sin_alpha*dfsizdda_l;
 dfsibydda_l=sin_beta*dfsixdda_l;
-dfsibzdda_l=cos_beta*sin_alpha*dfsibxdda_l+cos_alpha*dfsizdda_l;
+dfsibzdda_l=cos_beta*sin_alpha*dfsixdda_l+cos_alpha*dfsizdda_l;
 
 dfsibxdda_r=cos_beta*cos_alpha*dfsixdda_r-sin_alpha*dfsizdda_r;
 dfsibydda_r=sin_beta*dfsixdda_r;
-dfsibzdda_r=cos_beta*sin_alpha*dfsibxdda_r+cos_alpha*dfsizdda_r;
+dfsibzdda_r=cos_beta*sin_alpha*dfsixdda_r+cos_alpha*dfsizdda_r;
 
 
 %----The canard force part----%
@@ -348,21 +354,21 @@ dacdvx=dadvx;
 dacdvy=0;
 dacdvz=dadvz;
 dacddc=1;
+ 
+% cos_alpha_c=1/sqrt(1+(vc(3)/vc(1))^2);
+% sin_alpha_c=(vc(3)/vc(1))*cos_alpha_c;
 
-cos_alpha_c=1/sqrt(1+(vc(3)/vc(1))^2);
-sin_alpha_c=(vc(3)/vc(1))*cos_alpha_c;
-
-tempc1=sqrt((v_x*v_x+v_z*v_z)/vc(1)/vc(1));
-dsinacdvx=-v_z/(v_x*v_x+v_z*v_z)/tempc1;
-dsinacdvy=0;
-dsinacdvz=v_x/(v_x*v_x+v_z*v_z)/tempc1;
-dsinacddc=1/tempc1;
-
-tempc2=-vc(3)/vc(1);
-dcosacdvx=dsinacdvx*tempc2;
-dcosacdvy=0;
-dcosacdvz=dsinacdvz*tempc2;
-dcosacddc=dsinacddc*tempc2;
+% tempc1=sqrt((v_x*v_x+v_z*v_z)/vc(1)/vc(1));
+% dsinacdvx=-v_z/(v_x*v_x+v_z*v_z)/tempc1;
+% dsinacdvy=0;
+% dsinacdvz=v_x/(v_x*v_x+v_z*v_z)/tempc1;
+% dsinacddc=1/tempc1;
+% 
+% tempc2=-vc(3)/vc(1);
+% dcosacdvx=dsinacdvx*tempc2;
+% dcosacdvy=0;
+% dcosacdvz=dsinacdvz*tempc2;
+% dcosacddc=dsinacddc*tempc2;
 
 dvidvx=v_x/vi;
 dvidvy=v_y/vi;
@@ -379,34 +385,44 @@ dfczdvz=-(rho*Sc*vi*clc*dvidvz+0.5*vi*vi*rho*Sc*c_clm*dacdvz);
 dfcxddc=-0.5*c_cdm*rho*Sc*vi*vi*dacddc;
 dfczddc=-0.5*c_clm*rho*Sc*vi*vi*dacddc;
 
-dfcbxdvx=dcosbdvx*cos_alpha_c*fc(1)+dcosacdvx*cos_beta*fc(1)+cos_beta*cos_alpha_c*dfcxdvx-dfczdvx*sin_alpha_c-fc(3)*dsinacdvx;
-dfcbydvx=dacdvx*sin_beta+dsinbdvx*fc(1);
-dfcbzdvx=dcosbdvx*sin_alpha_c*fc(1)+cos_beta*dsinacdvx*fc(1)+cos_beta*sin_alpha_c*dfcxdvx+dcosacdvx*fc(3)+dfczdvx*cos_alpha_c;
+dfcbxdvx=dcosbdvx*cos_alpha*fc(1)+dcosbdvz*cos_beta*fc(1)+cos_beta*cos_alpha*dfcxdvx-dfczdvx*sin_alpha-fc(3)*dsinadvx;
+dfcbydvx=dfcxdvx*sin_beta+dsinbdvx*fc(1);
+dfcbzdvx=dcosbdvx*sin_alpha*fc(1)+cos_beta*dsinadvx*fc(1)+cos_beta*sin_alpha*dfcxdvx+dcosbdvz*fc(3)+dfczdvx*cos_alpha;
 
-dfcbxdvy=dcosbdvy*cos_alpha_c*fc(1)+dcosacdvy*cos_beta*fc(1)+cos_beta*cos_alpha_c*dfcxdvy-dfczdvy*sin_alpha_c-fc(3)*dsinacdvy;
-dfcbydvy=dacdvy*sin_beta+dsinbdvy*fc(1);
-dfcbzdvy=dcosbdvy*sin_alpha_c*fc(1)+cos_beta*dsinacdvy*fc(1)+cos_beta*sin_alpha_c*dfcxdvy+dcosacdvy*fc(3)+dfczdvy*cos_alpha_c;
+dfcbxdvy=dcosbdvy*cos_alpha*fc(1)+dcosadvy*cos_beta*fc(1)+cos_beta*cos_alpha*dfcxdvy-dfczdvy*sin_alpha-fc(3)*dsinadvy;
+dfcbydvy=dfcxdvy*sin_beta+dsinbdvy*fc(1);
+dfcbzdvy=dcosbdvy*sin_alpha*fc(1)+cos_beta*dsinadvy*fc(1)+cos_beta*sin_alpha*dfcxdvy+dcosadvy*fc(3)+dfczdvy*cos_alpha;
 
-dfcbxdvz=dcosbdvz*cos_alpha_c*fc(1)+dcosacdvz*cos_beta*fc(1)+cos_beta*cos_alpha_c*dfcxdvz-dfczdvz*sin_alpha_c-fc(3)*dsinacdvz;
-dfcbydvz=dacdvz*sin_beta+dsinbdvz*fc(1);
-dfcbzdvz=dcosbdvz*sin_alpha_c*fc(1)+cos_beta*dsinacdvz*fc(1)+cos_beta*sin_alpha_c*dfcxdvz+dcosacdvz*fc(3)+dfczdvz*cos_alpha_c;
+dfcbxdvz=dcosbdvz*cos_alpha*fc(1)+dcosadvz*cos_beta*fc(1)+cos_beta*cos_alpha*dfcxdvz-dfczdvz*sin_alpha-fc(3)*dsinadvz;
+dfcbydvz=dfcxdvz*sin_beta+dsinbdvz*fc(1);
+dfcbzdvz=dcosbdvz*sin_alpha*fc(1)+cos_beta*dsinadvz*fc(1)+cos_beta*sin_alpha*dfcxdvz+dcosadvz*fc(3)+dfczdvz*cos_alpha;
 
-dfcbxddc=cos_beta*(dcosacddc*fc(1)+dfcxddc*cos_alpha_c)-(dfczddc*sin_alpha_c+fc(3)*dsinacddc);
+dfcbxddc=cos_beta*cos_alpha*dfcxddc-sin_alpha*dfczddc;
 dfcbyddc=dfcxddc*sin_beta;
-dfcbzddc=cos_beta*(dsinacddc*fc(1)+dfcxddc*sin_alpha_c)+(dfczddc*cos_alpha_c+fc(3)*dcosacddc);
+dfcbzddc=cos_beta*dfcxddc*sin_alpha+cos_alpha*dfczddc;
 
 
 %----The motor force part----%
 
-dpbdvx_l=-2*ct_s*v_x;
-dpbdvy_l=-2*ct_s*v_y;
-dpbdvz_l=-2*ct_s*v_z;
-dpbddml=2*ct_s*kmotor*kmotor*ml;
+% dpbdvx_l=-2*ct_s*v_x;
+% dpbdvy_l=-2*ct_s*v_y;
+% dpbdvz_l=-2*ct_s*v_z;
+% dpbddml=2*ct_s*kmotor*kmotor*ml;
+% 
+% dpbdvx_r=-2*ct_s*v_x;
+% dpbdvy_r=-2*ct_s*v_y;
+% dpbdvz_r=-2*ct_s*v_z;
+% dpbddmr=2*ct_s*kmotor*kmotor*mr;
 
-dpbdvx_r=-2*ct_s*v_x;
-dpbdvy_r=-2*ct_s*v_y;
-dpbdvz_r=-2*ct_s*v_z;
-dpbddmr=2*ct_s*kmotor*kmotor*mr;
+dpbdvx_l=0;
+dpbdvy_l=0;
+dpbdvz_l=0;
+dpbddml=1;
+
+dpbdvx_r=0;
+dpbdvy_r=0;
+dpbdvz_r=0;
+dpbddmr=1;
 
 % dpbdvx_t=-2*ct_t*vx;
 % dpbdvy_t=-2*ct_t*vy;
@@ -687,7 +703,7 @@ Bc_aug=[Bc gc];
 
 
 
-tmp = expm([Ac Bc_aug; zeros(su+1,sx+su+1)]*Ts);
+% tmp = expm([Ac Bc_aug; zeros(su+1,sx+su+1)]*Ts);
 
 
 tmp = expm([Ac Bc_aug; zeros(su+1,sx+su+1)]*Ts);

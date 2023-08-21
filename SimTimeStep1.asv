@@ -13,17 +13,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function xp=SimTimeStep(x,u,Ts,ModelParams,GammaArray)
+function xp=SimTimeStep1(x,u,Ts,ModelParams,GammaArray)
 %x state
 %u input
 %Ts sampling time
 x0=x;
-
+global f_m;
 [~,inivt]=ode45(@(t,x)fx_bicycle(t,x,u,ModelParams,GammaArray),[0 Ts],x0);
 xp=inivt(end,:);
 return
 
 function xdot=fx_bicycle(t,x,u,ModelParams,GammaArray)
+
+global f_m;
 
 mass=ModelParams.m; %总质量
 Sa=ModelParams.Sa; %主翼面积
@@ -68,7 +70,7 @@ v_z=x(ModelParams.stateindex_vz);
 o_x=x(ModelParams.stateindex_omega_x);
 o_y=x(ModelParams.stateindex_omega_y);
 o_z=x(ModelParams.stateindex_omega_z);
-mu=x(ModelParams.stateindex_mu);
+% mu=x(ModelParams.stateindex_mu);
 
 dal=u(ModelParams.inputindex_delta_aileron_l);
 dar=u(ModelParams.inputindex_delta_aileron_r);
@@ -76,7 +78,7 @@ ml=u(ModelParams.inputindex_motor_l);
 mr=u(ModelParams.inputindex_motor_r);
 % mt=u(ModelParams.inputindex_motor_t);
 dc=u(ModelParams.inputindex_canard);
-vmu=u(ModelParams.inputindex_vmu);
+% vmu=u(ModelParams.inputindex_vmu);
 
 %左主翼面
 b2sx_l=ModelParams.b2sx_l;
@@ -150,6 +152,8 @@ Rw2b=[cos(aos)*cos(aoa_s) -sin(aos)*cos(aoa_s) -sin(aoa_s);
     sin(aos) cos(aos) 0;
     cos(aos)*sin(aoa_s) -sin(aos)*sin(aoa_s) cos(aoa_s)];
 
+Rw2b
+
 cls_l=wing_cl0+wing_clm*aoa_s+wing_a_clm*dal;
 cls_r=wing_cl0+wing_clm*aoa_s+wing_a_clm*dar;
 cds_l=wing_cd0+wing_cdm*abs(aoa_s)+wing_a_cdm*abs(dal);
@@ -209,6 +213,12 @@ l=mtotal(1);
 m=mtotal(2);
 n=mtotal(3);
 
+f_m_temp=[fxb;fyb;fzb;l;m;n];
+% if isempty(f_m)
+%     f_m=f_m_temp;
+% end
+f_m=[f_m,f_m_temp];
+
 %% formula of model
 xdot=[cos(theta)*cos(psi)*v_x+(sin(phi)*sin(theta)*cos(psi)-cos(phi)*sin(psi))*v_y+(cos(phi)*sin(theta)*cos(psi)+sin(phi)*sin(psi))*v_z;
     cos(theta)*sin(psi)*v_x+(sin(phi)*sin(theta)*sin(psi)+cos(phi)*cos(psi))*v_y+(cos(phi)*sin(theta)*sin(psi)-sin(phi)*cos(psi))*v_z;
@@ -221,8 +231,8 @@ xdot=[cos(theta)*cos(psi)*v_x+(sin(phi)*sin(theta)*cos(psi)-cos(phi)*sin(psi))*v
     o_y*v_x-o_x*v_y+fzb/mass;
     ga1*o_x*o_y-ga2*o_y*o_z+ga3*l+ga4*n;
     ga5*o_x*o_z-ga6*(o_x*o_x-o_z*o_z)+m/ModelParams.Jyy;
-    ga7*o_x*o_y-ga1*o_y*o_z+ga4*l+ga8*n;
-    u(6)];
+    ga7*o_x*o_y-ga1*o_y*o_z+ga4*l+ga8*n
+    ];
 
     
 return
